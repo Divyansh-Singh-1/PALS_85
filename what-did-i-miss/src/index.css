@@ -38,7 +38,7 @@
     min-height: 100vh;
   }
   
-  .panel-3d {
+  .panel-3d, .btn-3d {
     background: linear-gradient(to bottom, var(--color-panel-2), var(--color-panel));
     border: 3px solid;
     border-color: var(--color-grey-hi) var(--color-grey-lo) var(--color-grey-lo) var(--color-grey-hi);
@@ -48,7 +48,6 @@
   }
   
   .btn-3d {
-    @apply panel-3d;
     cursor: pointer;
   }
   
