@@ -24,3 +24,45 @@ export type ParseResult = {
   /** Count of system / media / deleted lines that were skipped. */
   skippedLines: number;
 };
+
+export type Priority = "critical" | "high" | "medium" | "fyi";
+
+export type FlagReason = "mention" | "date" | "task" | "decision" | "question" | "meeting";
+
+export type ScoredMessage = Message & {
+  priority: Priority;
+  score: number;
+  reasons: FlagReason[];
+};
+
+export type ExtractedDate = {
+  messageId: number;
+  date: Date;
+  type: "meeting" | "deadline" | "exam" | "event" | "other";
+  source: string; // the original message text snippet
+  overdue: boolean;
+};
+
+export type AnalysisResult = {
+  filtered: Message[]; // messages in the selected date range
+  scored: ScoredMessage[]; // all messages sorted by score desc
+  mentionMessages: Message[]; // messages mentioning the user
+  extractedDates: ExtractedDate[];
+  nextMeeting: ExtractedDate | null;
+  stats: {
+    totalInRange: number;
+    mentionCount: number;
+    importantCount: number;
+    upcomingDateCount: number;
+    actionItemCount: number;
+  };
+};
+
+export type AiSummary = {
+  tldr: string;
+  importantDates: string[];
+  decisions: string[];
+  actionItems: string[];
+  missedTasks: string[];
+  mentions: { reason: string }[];
+};

@@ -25,6 +25,16 @@ const IOS_HEADER =
   /^\[(\d{1,2}[./-]\d{1,2}[./-]\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[ap]\.?m\.?)?)\]\s+(.*)$/i;
 
 /**
+ * Header regex for Android copy-paste format.
+ * Example: `[10:32 pm, 12/05/2025] Ravi: text`
+ *
+ * Captures: (1) time, (2) date, (3) rest of line.
+ * Note: date and time are swapped vs the other formats.
+ */
+const ANDROID_COPY_HEADER =
+  /^\[(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[ap]\.?m\.?)?),?\s+(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})\]\s+(.*)$/i;
+
+/**
  * Splits the "rest" portion of a header line into sender and text.
  * Sender is limited to MAX_SENDER_LENGTH chars and must be followed by `: `.
  */
@@ -189,12 +199,23 @@ export function parseWhatsApp(raw: string): ParseResult {
     if (!match) {
       match = IOS_HEADER.exec(line);
     }
-    if (!match) return null;
-    return {
-      dateStr: match[1] ?? "",
-      timeStr: match[2] ?? "",
-      rest: match[3] ?? "",
-    };
+    if (match) {
+      return {
+        dateStr: match[1] ?? "",
+        timeStr: match[2] ?? "",
+        rest: match[3] ?? "",
+      };
+    }
+    // Android copy format: [time, date] Sender: text — captures are swapped
+    const copyMatch = ANDROID_COPY_HEADER.exec(line);
+    if (copyMatch) {
+      return {
+        dateStr: copyMatch[2] ?? "", // date is capture 2
+        timeStr: copyMatch[1] ?? "", // time is capture 1
+        rest: copyMatch[3] ?? "",
+      };
+    }
+    return null;
   }
 
   // Single regex pass: match all headers and cache results
